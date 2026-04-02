@@ -1,3 +1,4 @@
 fireworks-ai
+openai
 python-dotenv
 pandas

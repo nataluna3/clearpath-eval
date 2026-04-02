@@ -1,0 +1,50 @@
+[
+  {
+    "patient_id": "PT-001",
+    "age": 67,
+    "sex": "male",
+    "note": "Patient is a 67-year-old male presenting for routine follow-up. History of type 2 diabetes mellitus diagnosed 12 years ago, currently managed with metformin 1000mg BID and insulin glargine 20 units at bedtime. Last HbA1c was 8.4%, indicating suboptimal glycemic control. Also has hypertension managed with lisinopril 10mg daily. Patient reports occasional chest tightness with exertion over the past 3 weeks, which he has been dismissing as heartburn. BMI 31.2. Smoker, 1 PPD for 35 years, currently still smoking. Patient denies shortness of breath at rest but admits to reduced exercise tolerance. EKG on file from 6 months ago was normal, but given new exertional symptoms, cardiology referral warranted."
+  },
+  {
+    "patient_id": "PT-002",
+    "age": 34,
+    "sex": "female",
+    "note": "Patient is a 34-year-old female presenting for evaluation of persistent fatigue and unintentional weight loss of 12 lbs over 2 months. She reports increased thirst and frequent urination for the past 6 weeks. No significant past medical history. Family history positive for type 1 diabetes in a sibling. Physical exam unremarkable except for mild dry mucous membranes. Fasting blood glucose drawn today returned at 287 mg/dL. Patient appears anxious about the findings. Labs ordered include HbA1c, C-peptide, and autoantibody panel. Strong suspicion for new-onset type 1 diabetes. Patient counseled and referred to endocrinology urgently. No cardiovascular complaints."
+  },
+  {
+    "patient_id": "PT-003",
+    "age": 52,
+    "sex": "female",
+    "note": "52-year-old female with a 10-year history of major depressive disorder, currently on sertraline 100mg daily. Reports that over the past 6 weeks her depression has worsened significantly. PHQ-9 score today is 19, up from 11 at last visit 3 months ago. She endorses passive suicidal ideation without a plan or intent, stating 'I sometimes think everyone would be better off without me.' No prior suicide attempts. Lives alone since recent divorce. Social support is minimal. Denies substance use. Safety plan reviewed and updated. Psychiatry referral placed urgently. Patient agreed to call crisis line if ideation intensifies. Medication adjustment discussed; sertraline increased to 150mg pending psychiatry follow-up."
+  },
+  {
+    "patient_id": "PT-004",
+    "age": 78,
+    "sex": "male",
+    "note": "78-year-old male with congestive heart failure (EF 35% on last echo 4 months ago), atrial fibrillation, and chronic kidney disease stage 3. Current medications include furosemide 40mg daily, carvedilol 12.5mg BID, lisinopril 5mg daily, and apixaban 5mg BID. Patient presents today with a 4-day history of progressive lower extremity edema and dyspnea on exertion now occurring with minimal activity such as walking to the bathroom. Weight gain of 6 lbs in the past week. Lung exam reveals bibasilar crackles. BNP level markedly elevated at 1,840 pg/mL. Assessment: acute decompensated CHF. Furosemide dose increased, patient instructed on fluid and sodium restriction. If no improvement within 48 hours, hospital admission required."
+  },
+  {
+    "patient_id": "PT-005",
+    "age": 45,
+    "sex": "male",
+    "note": "45-year-old male, no significant past medical history, presents for annual wellness exam. Vital signs: BP 138/88, HR 72, BMI 27.4. Patient reports moderate stress at work but otherwise feels well. No chest pain, shortness of breath, or palpitations. Non-smoker, drinks alcohol socially (approximately 8 drinks per week). Father had a heart attack at age 58. Total cholesterol 224 mg/dL, LDL 148 mg/dL, HDL 42 mg/dL, triglycerides 170 mg/dL. Fasting glucose 102 mg/dL, consistent with impaired fasting glucose. Assessment: borderline hypertension, dyslipidemia, prediabetes. Lifestyle modification counseling provided. Follow-up in 3 months to reassess BP. Statin therapy discussed but deferred pending patient preference."
+  },
+  {
+    "patient_id": "PT-006",
+    "age": 29,
+    "sex": "female",
+    "note": "29-year-old female, G2P1, currently 28 weeks pregnant, presenting for routine prenatal visit. Reports mild ankle swelling, which she attributes to the heat. BP today is 152/96 mmHg, elevated from baseline of 118/74 at 12-week visit. Urine dipstick positive for 2+ protein. Patient denies headache, visual changes, or epigastric pain currently, but reports one episode of a 'bad headache' two days ago that resolved on its own. Reflexes are brisk. Assessment: suspected preeclampsia with severe features. Patient counseled on warning signs. Labs ordered: CBC, CMP, uric acid, 24-hour urine protein. Maternal-fetal medicine (MFM) consulted immediately. Patient instructed to go to labor and delivery triage if any symptoms recur before next appointment."
+  },
+  {
+    "patient_id": "PT-007",
+    "age": 61,
+    "sex": "female",
+    "note": "61-year-old female presenting with a 3-week history of progressively worsening low back pain. Pain is constant, rated 7/10, and is not relieved by ibuprofen or positional changes. She reports a 15-lb weight loss over the past 3 months, which she attributed to dieting but now questions. No trauma or history of osteoporosis. Past medical history notable for breast cancer treated with lumpectomy and radiation 8 years ago, reportedly in remission. On exam, she has focal tenderness over the L3-L4 vertebral bodies. No bowel or bladder dysfunction. Given her oncologic history and red-flag symptoms (weight loss, non-mechanical pain, night pain), urgent MRI of the lumbar spine was ordered to evaluate for metastatic disease. Oncology notified."
+  },
+  {
+    "patient_id": "PT-008",
+    "age": 19,
+    "sex": "male",
+    "note": "19-year-old male presenting to urgent care with a 2-day history of sore throat, fever to 101.8°F, and difficulty swallowing. Denies cough. Exam reveals tonsillar exudates, anterior cervical lymphadenopathy, and a soft palate petechiae. No drooling or stridor. Rapid strep test positive. No known drug allergies. Prescribed amoxicillin 500mg TID for 10 days. Patient counseled on completing the full antibiotic course and to return if symptoms worsen, particularly if he develops difficulty breathing, inability to swallow, or a muffled voice. Mono testing not performed at this visit but should be considered if symptoms do not resolve with antibiotic treatment. No high-risk features identified."
+  }
+]
