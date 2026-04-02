@@ -55,9 +55,9 @@ if not FIREWORKS_API_KEY:
 
 BASE_URL = "https://api.fireworks.ai/inference/v1"
 
-# Best model determined from eval results. Update this if your eval picks
-# a different winner.
-SWEEP_MODEL = "accounts/fireworks/models/llama-v3p1-70b-instruct"
+# Best model determined from eval results. Defaults to DeepSeek V3.2;
+# update this to the winner after reviewing eval_results.csv.
+SWEEP_MODEL = "accounts/fireworks/models/deepseek-v3p2"
 
 # Parameter grid
 TEMPERATURES = [0.0, 0.2, 0.5, 0.8]

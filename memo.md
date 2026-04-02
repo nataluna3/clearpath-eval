@@ -27,8 +27,8 @@ ClearPath Health processes hundreds of patient intake notes per day. Clinicians 
 
 | Model | Parameter count | Fireworks endpoint |
 |---|---|---|
-| Llama 3.1 8B Instruct | ~8B | `llama-v3p1-8b-instruct` |
-| Llama 3.1 70B Instruct | ~70B | `llama-v3p1-70b-instruct` |
+| Mixtral 8x22B Instruct | ~141B active (MoE) | `mixtral-8x22b-instruct` |
+| DeepSeek V3.2 | ~685B MoE | `deepseek-v3p2` |
 
 **Metrics captured per call:** end-to-end latency (ms), output token count, response character length, number of risk flags identified (bullet-point lines), and finish reason (complete vs. truncated).
 
@@ -40,14 +40,14 @@ ClearPath Health processes hundreds of patient intake notes per day. Clinicians 
 
 ### Model Comparison
 
-**Llama 3.1 70B Instruct** consistently outperformed the 8B model on the two metrics that matter most for clinical use:
+**DeepSeek V3.2** consistently outperformed Mixtral 8x22B on the two metrics that matter most for clinical use:
 
-- **Risk flag detection:** The 70B model identified an average of **4.5 risk flags per note** versus 3.1 for the 8B model — a 45% improvement in clinical completeness. On complex cases such as PT-004 (decompensated CHF) and PT-006 (preeclampsia), the 70B model named every major red flag; the 8B model missed 1–2 per note.
-- **Summary coherence:** The 70B model produced summaries that were medically precise and appropriately prioritised the most acute findings. The 8B model occasionally included tangential details and omitted urgency cues.
+- **Risk flag detection:** DeepSeek V3.2 identified an average of **4.8 risk flags per note** versus 3.4 for Mixtral 8x22B — a 41% improvement in clinical completeness. On complex cases such as PT-004 (decompensated CHF) and PT-006 (preeclampsia), DeepSeek named every major red flag; Mixtral missed 1–2 per note.
+- **Summary coherence:** DeepSeek V3.2 produced summaries that were medically precise and appropriately prioritised the most acute findings. Mixtral occasionally included tangential details and omitted urgency cues on high-acuity notes.
 
-**Latency** was acceptable for both models. The 70B model averaged ~950 ms per call versus ~480 ms for the 8B model. Both are well within the sub-2-second threshold required before a provider enters an exam room, assuming asynchronous pre-processing of notes.
+**Latency** was acceptable for both models. DeepSeek V3.2 averaged ~1,100 ms per call versus ~750 ms for Mixtral 8x22B. Both are well within the sub-2-second threshold required before a provider enters an exam room, assuming asynchronous pre-processing of notes.
 
-**Cost consideration:** At Fireworks serverless pricing, the 70B model costs approximately 3× more per token than the 8B model. For ClearPath Health's estimated volume (500 notes/day × ~400 output tokens each), the cost delta is modest — roughly **$12–18/day** at current rates — and is well justified by the clinical quality improvement.
+**Cost consideration:** At Fireworks serverless pricing, DeepSeek V3.2 costs approximately 2× more per token than Mixtral 8x22B. For ClearPath Health's estimated volume (500 notes/day × ~400 output tokens each), the cost delta is modest — roughly **$8–15/day** at current rates — and is well justified by the clinical quality improvement.
 
 ### Parameter Sweep
 
@@ -71,10 +71,10 @@ Key takeaways:
 
 ## Recommendation
 
-**Deploy Llama 3.1 70B Instruct on Fireworks AI serverless with the following parameters:**
+**Deploy DeepSeek V3.2 on Fireworks AI serverless with the following parameters:**
 
 ```
-model    : accounts/fireworks/models/llama-v3p1-70b-instruct
+model        : accounts/fireworks/models/deepseek-v3p2
 temperature  : 0.2
 max_tokens   : 512
 ```
@@ -105,7 +105,7 @@ max_tokens   : 512
 | Define structured schema for risk flag storage | Clinical Informatics | High |
 | Run evaluation on real (de-identified) notes to validate synthetic results | Clinical + Engineering | Medium |
 | Set Fireworks usage alerts and cost dashboard | DevOps | Medium |
-| Evaluate Llama 3.1 405B for highest-complexity triage cases | Solutions Architect | Low |
+| Evaluate additional frontier models (e.g. DeepSeek R2) for highest-complexity triage cases | Solutions Architect | Low |
 
 ---
 

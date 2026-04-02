@@ -47,11 +47,12 @@ if not FIREWORKS_API_KEY:
 # Fireworks OpenAI-compatible base URL
 BASE_URL = "https://api.fireworks.ai/inference/v1"
 
-# Models to compare. These are strong general-purpose instruction models
-# available on the Fireworks serverless endpoint.
+# Models to compare. DeepSeek V3.2 is a frontier-class 685B MoE model;
+# Mixtral 8x22B is a strong open-weights instruction model — a meaningful
+# contrast in scale and architecture for ClearPath's use case.
 MODELS = [
-    "accounts/fireworks/models/llama-v3p1-8b-instruct",
-    "accounts/fireworks/models/llama-v3p1-70b-instruct",
+    "accounts/fireworks/models/mixtral-8x22b-instruct",
+    "accounts/fireworks/models/deepseek-v3p2",
 ]
 
 # Prompt template — intentionally detailed to elicit structured clinical output.
