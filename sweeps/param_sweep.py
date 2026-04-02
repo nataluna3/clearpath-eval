@@ -27,7 +27,9 @@ Usage:
 
 Requirements:
     FIREWORKS_API_KEY must be set in .env at the repo root.
-    Run run_evals.py first to confirm the best model before editing SWEEP_MODEL.
+    Run run_evals.py first. Set SWEEP_MODEL to the same endpoint you plan to deploy;
+    the sweep optimises inference knobs for that model only — do not copy settings
+    from a different model without re-running the sweep on the deployed one.
 """
 
 import json
@@ -55,9 +57,9 @@ if not FIREWORKS_API_KEY:
 
 BASE_URL = "https://api.fireworks.ai/inference/v1"
 
-# Best model determined from eval results. Defaults to DeepSeek V3.2;
-# update this to the winner after reviewing eval_results.csv.
-SWEEP_MODEL = "accounts/fireworks/models/deepseek-v3p2"
+# Must match the production model: sweep results apply only to this endpoint.
+# After run_evals.py, set this to the model you are deploying (see eval_results.csv).
+SWEEP_MODEL = "accounts/fireworks/models/mixtral-8x22b-instruct"
 
 # Parameter grid
 TEMPERATURES = [0.0, 0.2, 0.5, 0.8]
