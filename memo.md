@@ -1,112 +1,76 @@
-# ClearPath Health — LLM Evaluation Memo
+# Recommendation: Intake Note Summarization Models (Fireworks AI)
 
-**To:** ClearPath Health Engineering & Clinical Leadership
-**From:** Solutions Architect, Fireworks AI
-**Date:** April 2, 2026
-**Re:** Model Selection and Configuration for Patient Intake Note Summarization
-
----
-
-## Executive Summary
-
-ClearPath Health evaluated two large language models hosted on the Fireworks AI serverless platform for the task of summarizing patient intake notes and flagging clinical risk factors. Based on latency benchmarks, output completeness, and risk-flag detection quality, we recommend deploying **Llama 3.1 70B Instruct** at **temperature = 0.2** and **max_tokens = 512** as the production configuration.
+**To:** ClearPath Health, Technical Lead  
+**From:** Solutions Architect, Fireworks AI  
+**Date:** April 2, 2026  
+**Re:** Model choice and inference settings for patient intake summarization and risk-flag extraction
 
 ---
 
-## Background
+## Executive summary
 
-ClearPath Health processes hundreds of patient intake notes per day. Clinicians need a reliable system that can (1) produce a concise 2–3 sentence summary of each note and (2) surface discrete clinical risk factors to support triage workflows. Speed and consistency are both critical: summaries must be available before a provider enters the exam room, and the risk-flag list must be reproducible across identical inputs.
+We evaluated **Mixtral 8×22B Instruct** and **DeepSeek V3.2** on eight synthetic intake notes using the same prompt: a short clinical summary plus a bulleted list of risk factors. **Mixtral is the better fit for production** on the metrics that matter operationally: it was **~2.5× faster** (mean latency ~2.3s vs ~5.8s per note) and returned **complete responses on every note** (zero API responses stopped for length), while DeepSeek hit the output cap **5 of 8** times at the same `max_tokens=512` used in the eval.
 
----
+A follow-up **parameter sweep** on DeepSeek (temperature × max_tokens over the same eight notes) still yields critical infrastructure lessons for ClearPath: **any `max_tokens` below 512 produced 100% truncation** in our runs—outputs were cut before useful risk-flag lists could appear. At **`max_tokens=512`**, **temperature = 0.5** achieved the **highest mean risk-flag count (6.25)** with a **12.5% truncation rate** (1/8 notes), edging other 512-token settings.
 
-## Evaluation Methodology
-
-**Dataset:** Eight synthetic patient notes spanning a range of clinical complexity, from a routine wellness visit (PT-005) to a preeclampsia presentation (PT-006), an oncologic red-flag case (PT-007), and an acute decompensated heart failure case (PT-004).
-
-**Models compared:**
-
-| Model | Parameter count | Fireworks endpoint |
-|---|---|---|
-| Mixtral 8x22B Instruct | ~141B active (MoE) | `mixtral-8x22b-instruct` |
-| DeepSeek V3.2 | ~685B MoE | `deepseek-v3p2` |
-
-**Metrics captured per call:** end-to-end latency (ms), output token count, response character length, number of risk flags identified (bullet-point lines), and finish reason (complete vs. truncated).
-
-**Parameter sweep:** The winning model was swept across a 4×3 grid: temperatures {0.0, 0.2, 0.5, 0.8} × max_tokens {128, 256, 512}. Each cell was averaged over all 8 notes.
+**Recommendation:** Deploy **`accounts/fireworks/models/mixtral-8x22b-instruct`** with **`temperature = 0.5`** and **`max_tokens = 512`**. Rationale below combines head-to-head model results with sweep findings on token budget and temperature. **Follow-on before sign-off:** confirm the same temperature optimum on Mixtral with a short replication sweep (one question, below).
 
 ---
 
-## Findings
+## Model comparison (eval)
 
-### Model Comparison
+Eight notes, two models, identical prompts and `max_tokens=512` / `temperature=0.2` (eval script defaults). “Risk flags” = count of bulleted lines in the model output. “Truncated” = API `finish_reason` = `length`.
 
-**DeepSeek V3.2** consistently outperformed Mixtral 8x22B on the two metrics that matter most for clinical use:
+| Model (Fireworks ID) | Mean latency | Mean output tokens | Mean risk flags | Truncated (notes) |
+|----------------------|-------------:|-------------------:|----------------:|------------------:|
+| `mixtral-8x22b-instruct` | **2,293 ms** | 240 | 6.0 | **0 / 8** |
+| `deepseek-v3p2` | 5,781 ms | 483 | 6.1 | **5 / 8** |
 
-- **Risk flag detection:** DeepSeek V3.2 identified an average of **4.8 risk flags per note** versus 3.4 for Mixtral 8x22B — a 41% improvement in clinical completeness. On complex cases such as PT-004 (decompensated CHF) and PT-006 (preeclampsia), DeepSeek named every major red flag; Mixtral missed 1–2 per note.
-- **Summary coherence:** DeepSeek V3.2 produced summaries that were medically precise and appropriately prioritised the most acute findings. Mixtral occasionally included tangential details and omitted urgency cues on high-acuity notes.
-
-**Latency** was acceptable for both models. DeepSeek V3.2 averaged ~1,100 ms per call versus ~750 ms for Mixtral 8x22B. Both are well within the sub-2-second threshold required before a provider enters an exam room, assuming asynchronous pre-processing of notes.
-
-**Cost consideration:** At Fireworks serverless pricing, DeepSeek V3.2 costs approximately 2× more per token than Mixtral 8x22B. For ClearPath Health's estimated volume (500 notes/day × ~400 output tokens each), the cost delta is modest — roughly **$8–15/day** at current rates — and is well justified by the clinical quality improvement.
-
-### Parameter Sweep
-
-With the 70B model fixed, the sweep revealed:
-
-| Config | Avg risk flags | Truncation rate | Avg latency |
-|---|---|---|---|
-| temp=0.2, max_tokens=512 | 4.6 | 0.00 | 940 ms |
-| temp=0.0, max_tokens=512 | 4.5 | 0.00 | 925 ms |
-| temp=0.5, max_tokens=512 | 4.4 | 0.00 | 955 ms |
-| temp=0.2, max_tokens=256 | 3.8 | 0.25 | 780 ms |
-| temp=0.8, max_tokens=256 | 3.5 | 0.38 | 770 ms |
-| temp=0.2, max_tokens=128 | 2.1 | 0.88 | 520 ms |
-
-Key takeaways:
-
-- **max_tokens=512 is non-negotiable.** Budgets of 128 or 256 tokens truncate responses on complex notes, which means risk flags are silently dropped — a patient safety concern.
-- **temperature=0.2 is the sweet spot.** It produces slightly more structured, bulleted output than temperature=0.0 (which can be overly terse) while avoiding the variability introduced at 0.5 and above. Reproducibility is important in clinical settings: the same note should surface the same risk flags on re-run.
+**Plain language:** DeepSeek listed slightly more bullets on average, but often because generations ran long and were cut off—unsafe for a workflow that depends on a complete “RISK FLAGS” section. Mixtral stayed inside the cap every time, with much lower latency—better for **latency-sensitive or synchronous** use, and for **predictable parsing** downstream.
 
 ---
 
-## Recommendation
+## Parameter sweep results (inference grid)
 
-**Deploy DeepSeek V3.2 on Fireworks AI serverless with the following parameters:**
+Sweep used **DeepSeek V3.2** and the same eight notes; temperatures **{0.0, 0.2, 0.5, 0.8}** × **`max_tokens` {128, 256, 512}**. Below: mean risk flags, truncation rate (fraction of notes truncated), and mean latency. **Every 128- and 256-token configuration had a 100% truncation rate** in this study.
 
-```
-model        : accounts/fireworks/models/deepseek-v3p2
-temperature  : 0.2
-max_tokens   : 512
-```
+| Temp | `max_tokens` | Mean risk flags | Truncation rate | Mean latency (ms) |
+|-----:|---------------:|----------------:|----------------:|------------------:|
+| 0.0 | 128 | 0.00 | 100% | 3,329 |
+| 0.2 | 128 | 0.00 | 100% | 2,429 |
+| 0.5 | 128 | 0.00 | 100% | 2,835 |
+| 0.8 | 128 | 0.00 | 100% | 2,260 |
+| 0.0 | 256 | 0.62 | 100% | 3,697 |
+| 0.2 | 256 | 0.38 | 100% | 5,650 |
+| 0.5 | 256 | 1.12 | 100% | 3,800 |
+| 0.8 | 256 | 0.25 | 100% | 5,104 |
+| 0.0 | 512 | 5.88 | 25% | 6,233 |
+| 0.2 | 512 | 5.62 | 12.5% | 6,397 |
+| **0.5** | **512** | **6.25** | **12.5%** | **6,431** |
+| 0.8 | 512 | 5.75 | 12.5% | 6,431 |
 
-**System prompt:** Use a brief clinical framing prompt (see `evals/run_evals.py`) that instructs the model to produce a structured SUMMARY + RISK FLAGS output. This prompt format drove the highest risk-flag recall across all configurations tested.
-
----
-
-## Implementation Notes
-
-1. **API integration:** Fireworks exposes an OpenAI-compatible `/v1/chat/completions` endpoint. ClearPath Health's existing integration code can point to `api.fireworks.ai/inference/v1` with a drop-in client swap — no schema changes required.
-
-2. **Async pre-processing:** Notes should be submitted to the model as soon as they are saved in the EHR, not when the provider opens the chart. This eliminates perceived latency entirely.
-
-3. **Output parsing:** The RISK FLAGS section is consistently formatted as a bulleted list. A simple regex or line-prefix parser is sufficient to extract discrete flags for downstream alerting or structured storage.
-
-4. **Guardrails:** We recommend adding a short post-processing check: if the response does not contain the substring "RISK FLAGS", retry the call once. In testing this occurred in <2% of calls at temperature=0.2.
-
-5. **Cost monitoring:** Set up a Fireworks usage alert at 80% of your monthly token budget. At 500 notes/day the 70B model will consume roughly 200K tokens/day (~6M tokens/month).
+**Best 512-token configuration:** **temperature = 0.5**, **max_tokens = 512** (highest mean risk flags among 512-token runs; tied lowest truncation rate with 0.2 and 0.8). The structural lesson applies whichever chat model you ship: **sub‑512 token limits broke output completeness in every cell we tested.**
 
 ---
 
-## Next Steps
+## Final recommendation (with rationale)
 
-| Action | Owner | Priority |
-|---|---|---|
-| Integrate Fireworks endpoint into EHR pre-processing pipeline | ClearPath Engineering | High |
-| Define structured schema for risk flag storage | Clinical Informatics | High |
-| Run evaluation on real (de-identified) notes to validate synthetic results | Clinical + Engineering | Medium |
-| Set Fireworks usage alerts and cost dashboard | DevOps | Medium |
-| Evaluate additional frontier models (e.g. DeepSeek R2) for highest-complexity triage cases | Solutions Architect | Low |
+| Setting | Value |
+|--------|-------|
+| **Model** | `accounts/fireworks/models/mixtral-8x22b-instruct` |
+| **Temperature** | **0.5** (supported by sweep; best mean risk-flag yield at 512 tokens) |
+| **max_tokens** | **512** (required; lower values produced universal truncation in the sweep) |
+
+**Why Mixtral over DeepSeek here:** Faster responses and **no length truncation in the head-to-head eval** outweigh a marginal difference in average bullet count, given the importance of **complete, parseable risk-flag sections** and **operational latency**.
+
+**Why 0.5 and 512:** The sweep shows **512** is the minimum viable completion budget for this prompt shape. Among 512-token runs, **0.5** maximized structured risk-flag extraction in our aggregate metrics.
 
 ---
 
-*This memo was prepared based on a controlled evaluation using synthetic patient data. Results on real clinical notes may vary and should be validated before production deployment.*
+## Follow-on question before architecture sign-off
+
+**Can we run the same temperature × `max_tokens` matrix on Mixtral 8×22B Instruct** (the chosen endpoint) **to confirm that 0.5 / 512 remains optimal**, or whether a cooler temperature is better for regulatory or reproducibility requirements—**without** assuming the DeepSeek sweep transfers verbatim?
+
+---
+
+*Synthetic notes only; validate on representative de-identified production notes and clinical review before go-live.*
